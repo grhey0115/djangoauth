@@ -35,14 +35,12 @@ def home(request):
             user = auth_instance.sign_in_with_email_and_password(email, password)
             user_id = user["localId"]
 
-            # Fetch user data from Firebase to get the role
+            # Fetch user data from Firebase
             user_data = db.child("users").child(user_id).get().val()
 
             if not user_data:
                 messages.error(request, "User not found. Please log in again.")
                 return redirect("home")
-
-            role = user_data.get("role")  # Assuming 'role' is stored in the user data
 
             # Generate OTP
             otp = random.randint(100000, 999999)
@@ -67,24 +65,15 @@ def home(request):
                 messages.error(request, f"Failed to send OTP email: {e}")
                 return redirect("home")
 
-            # Redirect based on the user's role
-            if role == "user":
-                return redirect(f"{reverse('OTPVerification')}?user_id={user_id}")
-            elif role == "admin":
-                return redirect(f"{reverse('OTPVerification')}?user_id={user_id}")
-            else:
-                messages.error(request, "Invalid role. Please contact support.")
-                return redirect("home")
+            # Redirect to OTP verification
+            return redirect(f"{reverse('OTPVerification')}?user_id={user_id}")
+            
         except Exception:
             messages.error(request, "Invalid credentials. Please try again.")
             return redirect("home")
 
     return render(request, "index.html")
 
-
-
-
- 
 def OTPVerification(request):
     if request.method == "POST":
         input_otp = request.POST.get("otp")
@@ -110,19 +99,8 @@ def OTPVerification(request):
             # Save user_id manually in the session
             request.session["user_id"] = user_id
 
-            # Check role and redirect accordingly
-            role = session_data.get("role")
-
-            if role == "user":
-                messages.success(request, "User logged in successfully.")
-                return redirect("userhomepage")  # Redirect to user homepage
-            elif role == "admin":
-                messages.success(request, "Admin logged in successfully.")
-                return redirect("adminhomepage")  # Redirect to admin homepage
-            else:
-                messages.error(request, "Invalid role. Please contact support.")
-                return redirect("home")
-
+            messages.success(request, "Successfully logged in.")
+            return redirect("userhomepage")
         else:
             messages.error(request, "Invalid OTP. Please try again.")
             return redirect("OTPVerification")
@@ -135,26 +113,17 @@ def OTPVerification(request):
 
     return render(request, "verify-to-login.html", {"user_id": user_id})
 
-
-
-
- 
-
-
-
-
 def signup(request):
     if request.method == "POST":
         username = request.POST.get("username")
         email = request.POST.get("email")
         password = request.POST.get("password")
         confirm_password = request.POST.get("confirmPassword")
-        role = request.POST.get("role")
 
         # Validate input
         if len(username) < 4:
             messages.error(request, "Username must be at least 4 characters long")
-            return redirect("signup")  # Replace "signup" with the name of your signup URL
+            return redirect("signup")
 
         if password != confirm_password:
             messages.error(request, "Passwords do not match")
@@ -172,13 +141,12 @@ def signup(request):
             user_id = user["localId"]
             db.child("users").child(user_id).set({
                 "username": username,
-                "email": email,
-                "role": role,
+                "email": email
             })
 
             # Success message
             messages.success(request, "User registered successfully")
-            return redirect("home")  # Replace "home" with the name of your success page
+            return redirect("home")
 
         except Exception as e:
             error_message = str(e)
@@ -208,9 +176,6 @@ def userhomepage(request):
         messages.error(request, f"An error occurred: {e}")
         return redirect("home")
 
-
-
-
 def logout_view(request):
     # Clear the session data
     request.session.flush()
@@ -219,7 +184,7 @@ def logout_view(request):
     messages.success(request, "You have been successfully logged out.")
     
     # Redirect to the home page
-    return redirect("home")   
+    return redirect("home")  
 
 def adminhomepage(request):
     try:
