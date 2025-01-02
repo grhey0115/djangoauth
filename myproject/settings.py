@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-h-t6zt+m=&+%@i*1ivh8z8b++xl5eq5@jgy)eof#ez3b4im2b-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', '.vercel.app']
+ALLOWED_HOSTS = ['*']
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -76,7 +76,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'myproject.wsgi.app'
+WSGI_APPLICATION = 'myproject.wsgi.application'
 
 
 # Database
@@ -139,7 +139,7 @@ STATIC_URL = '/static/'  # Use trailing slash
 STATICFILES_DIRS = [   
     BASE_DIR / "static", 
 ]
-STATIC_ROOT = BASE_DIR / "staticfiles"   # Used for 'collectstatic' in production
+STATIC_ROOT = BASE_DIR / "staticfiles"  # Used for 'collectstatic' in production
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
